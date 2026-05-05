@@ -1,17 +1,21 @@
+import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 
-export default async function HomePage() {
+export const dynamic = 'force-dynamic'
+
+export default async function PublicPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>   // <-- params is now a Promise
+}) {
+  const { slug } = await params       // <-- await it
+
   const page = await prisma.page.findUnique({
-    where: { slug: 'home' },
+    where: { slug },
   })
 
   if (!page || !page.isPublished) {
-    return (
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold">Welcome to School</h1>
-        <p className="mt-4">Please create a page with slug &quot;home&quot; to customize this content.</p>
-      </main>
-    )
+    notFound()
   }
 
   return (
