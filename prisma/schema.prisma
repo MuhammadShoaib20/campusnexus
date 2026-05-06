@@ -76,3 +76,26 @@ model Student {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
+
+enum AdmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Admission {
+  id              String          @id @default(cuid())
+  campusId        String          @default("default")
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime?
+  gender          Gender?
+  desiredClass    String?         // not yet a Class relation, just a string
+  guardianName    String
+  guardianPhone   String
+  guardianEmail   String?
+  address         String?
+  status          AdmissionStatus @default(PENDING)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
