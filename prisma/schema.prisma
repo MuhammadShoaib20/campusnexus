@@ -49,6 +49,7 @@ model Class {
   campusId  String    @default("default")
   name      String    // e.g. "Nursery", "Class 1"
   students  Student[]
+  feeStructures  FeeStructure[]     // ← ADD THIS
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -72,6 +73,7 @@ model Student {
   guardianEmail   String?
   address         String?
   photoUrl        String?   // Cloudinary URL
+  feeVouchers     FeeVoucher[]   // ← ADD THIS
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -98,4 +100,45 @@ model Admission {
   status          AdmissionStatus @default(PENDING)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+}
+
+model FeeStructure {
+  id        String   @id @default(cuid())
+  campusId  String   @default("default")
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id])
+  feeType   String   // e.g. "Tuition", "Transport"
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campusId, classId, feeType])
+}
+
+model FeeVoucher {
+  id         String    @id @default(cuid())
+  campusId   String    @default("default")
+  studentId  String
+  student    Student   @relation(fields: [studentId], references: [id])
+  month      Int       // 1–12
+  year       Int
+  totalAmount Float
+  isPaid     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  payments   Payment[]
+
+  @@unique([campusId, studentId, month, year])
+}
+
+model Payment {
+  id          String    @id @default(cuid())
+  campusId    String    @default("default")
+  voucherId   String
+  voucher     FeeVoucher @relation(fields: [voucherId], references: [id])
+  amount      Float
+  method      String    @default("Cash") // Cash, Online, etc.
+  receivedBy  String?   // user ID maybe later
+  paidAt      DateTime  @default(now())
 }
