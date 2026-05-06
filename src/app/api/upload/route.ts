@@ -1,61 +1,59 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/auth'
-import { v2 as cloudinary } from 'cloudinary'
-import { IncomingForm, Fields, Files } from 'formidable'
-import { Readable } from 'stream'
-import { IncomingMessage } from 'http'
+import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
+import { v2 as cloudinary } from "cloudinary"
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// Helper to parse form-data from a NextRequest
-async function parseForm(
-  req: NextRequest
-): Promise<{ fields: Fields; files: Files }> {
-  const form = new IncomingForm()
-  const body = await req.arrayBuffer()
-  const buf = Buffer.from(body)
-  const fakeReq = Readable.from(buf) as unknown as IncomingMessage
-  fakeReq.headers = Object.fromEntries(req.headers.entries())
-
-  return new Promise((resolve, reject) => {
-    form.parse(fakeReq, (err, fields, files) => {
-      if (err) reject(err)
-      else resolve({ fields, files })
-    })
-  })
-}
-
 export async function POST(req: NextRequest) {
-  // 🔐 Auth check (TASK KA MAIN PART)
+  // 1. Authentication check
   const session = await auth()
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // ⬇️ Neeche ka code bilkul same hai (unchanged)
   try {
-    const { files } = await parseForm(req)
+    // 2. Parse uploaded file from FormData
+    const formData = await req.formData()
+    const file = formData.get("image") as File | null
 
-    const rawImage = files.image
-    if (!rawImage) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+    if (!file) {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
     }
 
-    const file = Array.isArray(rawImage) ? rawImage[0] : rawImage
+    // 3. Convert file to buffer for Cloudinary
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
 
-    const result = await cloudinary.uploader.upload(file.filepath, {
-      folder: 'campusnexus',
+    // 4. Upload to Cloudinary using upload_stream with unsigned upload
+    const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { 
+            folder: "campusnexus",
+            unsigned: true,
+            upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET
+          }, 
+          (error, result) => {
+            if (error) reject(error)
+            else if (result) resolve(result)
+            else reject(new Error("Unknown Cloudinary error"))
+          }
+        )
+        .end(buffer)
     })
 
-    return NextResponse.json({ url: result.secure_url })
+    // 5. Return the secure URL
+    return NextResponse.json({ url: uploadResult.secure_url })
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    console.error("Upload error:", error)
+    // For debugging – you can remove 'details' later
+    return NextResponse.json(
+      { error: "Upload failed", details: (error as Error).message },
+      { status: 500 }
+    )
   }
 }

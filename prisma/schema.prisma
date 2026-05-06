@@ -36,3 +36,43 @@ model Page {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Add to existing enums
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Class {
+  id        String    @id @default(cuid())
+  campusId  String    @default("default")
+  name      String    // e.g. "Nursery", "Class 1"
+  students  Student[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  @@unique([campusId, name])
+
+}
+
+model Student {
+  id              String    @id @default(cuid())
+  campusId        String    @default("default")
+  admissionNumber String?
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime?
+  gender          Gender?
+  classId         String?
+  class           Class?    @relation(fields: [classId], references: [id])
+  rollNumber      String?
+  guardianName    String?
+  guardianPhone   String?
+  guardianEmail   String?
+  address         String?
+  photoUrl        String?   // Cloudinary URL
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
