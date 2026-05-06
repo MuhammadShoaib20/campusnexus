@@ -74,6 +74,7 @@ model Student {
   address         String?
   photoUrl        String?   // Cloudinary URL
   feeVouchers     FeeVoucher[]   // ← ADD THIS
+  attendances   Attendance[]
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -141,4 +142,25 @@ model Payment {
   method      String    @default("Cash") // Cash, Online, etc.
   receivedBy  String?   // user ID maybe later
   paidAt      DateTime  @default(now())
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+model Attendance {
+  id         String           @id @default(cuid())
+  campusId   String           @default("default")
+  studentId  String
+  student    Student          @relation(fields: [studentId], references: [id])
+  date       DateTime         @db.Date   // store only date part
+  status     AttendanceStatus
+  method     String           @default("MANUAL")   // MANUAL, CSV, QR
+  recordedBy String?          // user ID of teacher
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([campusId, studentId, date])
 }
