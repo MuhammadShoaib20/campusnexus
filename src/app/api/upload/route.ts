@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
 import { v2 as cloudinary } from 'cloudinary'
 import { IncomingForm, Fields, Files } from 'formidable'
 import { Readable } from 'stream'
-import { IncomingMessage } from 'http'   // <-- add this import
+import { IncomingMessage } from 'http'
 
 // Configure Cloudinary
 cloudinary.config({
@@ -22,7 +23,6 @@ async function parseForm(
   fakeReq.headers = Object.fromEntries(req.headers.entries())
 
   return new Promise((resolve, reject) => {
-    // No more 'as any' – types from @types/formidable are now available
     form.parse(fakeReq, (err, fields, files) => {
       if (err) reject(err)
       else resolve({ fields, files })
@@ -31,18 +31,24 @@ async function parseForm(
 }
 
 export async function POST(req: NextRequest) {
+  // 🔐 Auth check (TASK KA MAIN PART)
+  const session = await auth()
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // ⬇️ Neeche ka code bilkul same hai (unchanged)
   try {
     const { files } = await parseForm(req)
-    // `files.image` could be File, File[], or undefined
+
     const rawImage = files.image
     if (!rawImage) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
 
-    // Normalise to a single file
     const file = Array.isArray(rawImage) ? rawImage[0] : rawImage
 
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(file.filepath, {
       folder: 'campusnexus',
     })
