@@ -49,8 +49,8 @@ model Class {
   campusId  String    @default("default")
   name      String    // e.g. "Nursery", "Class 1"
   students  Student[]
-  feeStructures  FeeStructure[]     // ← ADD THIS
-
+  feeStructures  FeeStructure[]     
+  exams     Exam[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   @@unique([campusId, name])
@@ -73,8 +73,9 @@ model Student {
   guardianEmail   String?
   address         String?
   photoUrl        String?   // Cloudinary URL
-  feeVouchers     FeeVoucher[]   // ← ADD THIS
-  attendances   Attendance[]
+  feeVouchers     FeeVoucher[]  
+  attendances     Attendance[]
+  marks           Mark[]
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -163,4 +164,56 @@ model Attendance {
   updatedAt  DateTime         @updatedAt
 
   @@unique([campusId, studentId, date])
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  campusId  String   @default("default")
+  name      String
+  code      String?  // optional short code
+
+  examSubjects ExamSubject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campusId, name])
+}
+
+model Exam {
+  id        String   @id @default(cuid())
+  campusId  String   @default("default")
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id])
+  name      String   // e.g., "Midterm 2026"
+  date      DateTime @db.Date
+  type      String   @default("Midterm") // "Midterm", "Final", etc.
+
+  examSubjects ExamSubject[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ExamSubject {
+  id        String  @id @default(cuid())
+  examId    String
+  exam      Exam   @relation(fields: [examId], references: [id])
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  maxMarks  Float
+
+  marks     Mark[]
+
+  @@unique([examId, subjectId])
+}
+
+model Mark {
+  id            String      @id @default(cuid())
+  studentId     String
+  student       Student     @relation(fields: [studentId], references: [id])
+  examSubjectId String
+  examSubject   ExamSubject @relation(fields: [examSubjectId], references: [id])
+  obtainedMarks Float
+
+  @@unique([studentId, examSubjectId])
 }
