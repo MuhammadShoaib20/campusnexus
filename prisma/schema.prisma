@@ -15,9 +15,9 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
+  id    String @id @default(cuid())
+  email String @unique
+  name  String
   password  String
   role      Role     @default(ADMIN)
   campusId  String   @default("default")
@@ -26,6 +26,8 @@ model User {
   children            Student[]            @relation("ParentStudents")
   teacherAssignments  TeacherAssignment[]
   assignments         Assignment[]
+  phone     String?
+
 }
 
 model Page {
@@ -251,4 +253,13 @@ model Assignment {
   dueDate   DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+}
+
+model Campus {
+  id        String   @id @default(cuid())
+  name      String   @default("Default Campus")
+  slug      String   @unique @default("default")
+  settings  Json?    // e.g., { "logoUrl": "...", "primaryColor": "#1e40af", "address": "...", "phone": "...", "email": "..." }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
