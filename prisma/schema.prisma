@@ -26,6 +26,7 @@ model User {
   children            Student[]            @relation("ParentStudents")
   teacherAssignments  TeacherAssignment[]
   assignments         Assignment[]
+  salaries            Salary[]
   phone     String?
 
 }
@@ -253,6 +254,30 @@ model Assignment {
   dueDate   DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  campusId    String   @default("default")
+  description String
+  amount      Float
+  date        DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Salary {
+  id        String   @id @default(cuid())
+  campusId  String   @default("default")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  month     Int
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campusId, userId, month, year])
 }
 
 model Campus {
