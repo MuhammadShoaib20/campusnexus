@@ -263,3 +263,13 @@ model Campus {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Notification {
+  id        String   @id @default(cuid())
+  campusId  String   @default("default")
+  message   String
+  type      String   @default("INFO")  // "ADMISSION", "PAYMENT", "ATTENDANCE", etc.
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

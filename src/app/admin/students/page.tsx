@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import AdminHeader from "@/components/AdminHeader"
 
 export default async function StudentsPage() {
   const session = await auth()
@@ -9,7 +10,9 @@ export default async function StudentsPage() {
   // We'll fetch students client-side for dynamic updates, but for initial list we can do server fetch.
   // We'll just render the basic structure with a client component table.
   return (
-    <div className="p-6">
+    <div>
+      <AdminHeader />
+      <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Students</h1>
         <div className="flex gap-2">
@@ -23,6 +26,7 @@ export default async function StudentsPage() {
       </div>
       {/* Client component for interactive table */}
       <StudentsTable />
+      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import ExamsClient from "./ExamsClient"
+import AdminHeader from "@/components/AdminHeader"
 
 export default async function ExamsPage() {
   const session = await auth()
@@ -23,5 +24,10 @@ export default async function ExamsPage() {
     date: exam.date.toISOString(),
   }))
 
-  return <ExamsClient classes={classes} subjects={subjects} exams={exams} />
+  return (
+    <div>
+      <AdminHeader />
+      <ExamsClient classes={classes} subjects={subjects} exams={exams} />
+    </div>
+  )
 }

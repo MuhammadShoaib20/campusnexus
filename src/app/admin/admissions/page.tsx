@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import AdmissionsClient from "./AdmissionsClient"
+import AdminHeader from "@/components/AdminHeader"
 
 export default async function AdmissionsPage() {
   const session = await auth()
@@ -20,9 +21,12 @@ const admissions = admissionsRaw.map((admission) => ({
 }))
 
 return (
-    <div className="p-6">
+    <div>
+      <AdminHeader />
+      <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Admission Applications</h1>
       <AdmissionsClient admissions={admissions} />
+      </div>
     </div>
 )
 }

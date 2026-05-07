@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
+import AdminHeader from "@/components/AdminHeader"
 
 export default async function Dashboard() {
   const session = await auth()
@@ -17,7 +18,9 @@ export default async function Dashboard() {
   ])
 
   return (
-    <div className="p-6">
+    <div>
+      <AdminHeader />
+      <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -53,6 +56,7 @@ export default async function Dashboard() {
         <a href="/campusnexus/src/app/admin/admissions/AdmissionsClient.tsx" className="text-blue-600 underline">
           View Admission Applications
         </a>
+      </div>
       </div>
     </div>
   )
