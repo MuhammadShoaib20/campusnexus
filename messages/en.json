@@ -1,0 +1,33 @@
+{
+  "Home": {
+    "title": "Welcome to DEBS",
+    "heroTitle": "Excellence in Education",
+    "heroSubtitle": "Building future leaders since 1998",
+    "applyNow": "Apply Now",
+    "downloadVoucher": "Download Fee Voucher",
+    "latestNews": "Latest News",
+    "noNews": "No recent news",
+    "quickLinks": "Quick Links",
+    "viewGallery": "View Gallery",
+    "contactUs": "Contact Us",
+    "aboutSnippet": "Providing quality education for over 25 years. Our dedicated faculty, modern facilities, and innovative curriculum ensure every student reaches their full potential."
+  },
+  "Nav": {
+    "home": "Home",
+    "about": "About",
+    "admissions": "Admissions",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "parentLogin": "Parent Login"
+  },
+  "Footer": {
+    "quickLinks": "Quick Links",
+    "contactInfo": "Contact Info",
+    "copyright": "© {year} DEBS. All rights reserved."
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "submit": "Submit"
+  }
+}
