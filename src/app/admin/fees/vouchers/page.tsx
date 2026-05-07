@@ -185,12 +185,32 @@ export default function VouchersPage() {
               <td className="p-2">
                 <div className="flex gap-2 items-center">
                   {!v.isPaid && (
-                    <button
-                      onClick={() => setShowPayment(v.id)}
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      Record Payment
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setShowPayment(v.id)}
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        Record Payment
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const res = await fetch("/api/payments/init", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ voucherId: v.id }),
+                          })
+                          const data = await res.json()
+                          if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl
+                          } else {
+                            alert("Failed to initiate payment")
+                          }
+                        }}
+                        className="text-purple-600 hover:underline text-sm"
+                      >
+                        Pay Online
+                      </button>
+                    </>
                   )}
                   <a
                     href={`/api/fees/receipt/${v.id}`}
