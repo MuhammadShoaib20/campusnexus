@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { sendWhatsAppMessage } from "@/lib/twilio"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -63,6 +64,22 @@ export async function POST(req: NextRequest) {
         },
       })
     }
+
+    // Send WhatsApp notifications for absent students
+    const absentRecords = records.filter((r: { studentId: string; date: string; status: string }) => r.status === "ABSENT")
+    for (const record of absentRecords) {
+      const student = await prisma.student.findUnique({
+        where: { id: record.studentId },
+        select: { firstName: true, guardianPhone: true },
+      })
+      if (student?.guardianPhone) {
+        await sendWhatsAppMessage(
+          student.guardianPhone,
+          `${student.firstName} was marked absent today (${new Date(record.date).toLocaleDateString()}). Please contact the school if this is unexpected. - DEBS`
+        )
+      }
+    }
+
     return NextResponse.json({ success: true }, { status: 201 })
   } catch (error) {
     console.error(error)

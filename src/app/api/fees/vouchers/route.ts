@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { sendWhatsAppMessage } from "@/lib/twilio"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -81,6 +82,21 @@ export async function POST(req: NextRequest) {
       },
     })
     created++
+  }
+
+  // Send WhatsApp notifications to parents
+  for (const student of students) {
+    if (student.guardianPhone) {
+      const structures = await prisma.feeStructure.findMany({
+        where: { campusId, classId: student.classId! },
+      })
+      const totalAmount = structures.reduce((sum, s) => sum + s.amount, 0)
+
+      await sendWhatsAppMessage(
+        student.guardianPhone,
+        `Dear parent, a new fee voucher of ${totalAmount} for ${month}/${year} has been generated for ${student.firstName}. Please pay at the earliest. - DEBS`
+      )
+    }
   }
 
   return NextResponse.json({ created })
